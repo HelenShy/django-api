@@ -4,11 +4,12 @@ from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.models import BaseUserManager
 
 
+
 class UserProfileManager(BaseUserManager):
     """
     Helps Django to work with our custom user model.
     """
-    def create_user(self, email, name, password):
+    def create_user(self, email, name, password=None):
         """
         Creates a new user profile object
         """
@@ -62,3 +63,42 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+
+class ProfileFeedItem(models.Model):
+    """
+    Profile status update
+    """
+    user_profile = models.ForeignKey('UserProfile', on_delete=models.CASCADE)
+    status_text = models.CharField(max_length=255)
+    created_on = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        """
+        Return the model as a string
+        """
+        return self.status_text
+
+
+class Lyrics(models.Model):
+    """
+    Song lyrics
+    """
+    artist = models.CharField(max_length=255)
+    song_title = models.CharField(max_length=255)
+    song_lyrics = models.CharField(max_length=1023)
+    user_profile = models.ForeignKey('UserProfile', on_delete=models.CASCADE)
+    lyrics_collection = models.ForeignKey('LyricsCollection', related_name='lyrics_list', on_delete=models.CASCADE)
+    public = models.BooleanField(default=True)
+    video_url = models.URLField(max_length=255, blank=True)
+
+
+class LyricsCollection(models.Model):
+    """
+    Collection of song lyrics
+    """
+    user_profile = models.ForeignKey('UserProfile', on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.title
