@@ -75,11 +75,13 @@ class SearchViewSet(viewsets.ViewSet):
             try:
                 lyrics = search_functions.find_lyrics(artist, song_title)
             except Exception as e:
-                return Response({'error':"Lyrics were not found \n" +str(e)})
+                lyrics = "Lyrics were not found \n" +str(e)}
+                #return Response({'error':"Lyrics were not found \n" +str(e)})
             try:
                 video_url = search_functions.find_video_url(artist, song_title)
             except Exception as e:
-                return Response({'error':"Exception occurred when searching for video \n" +str(e)})
+                video_url = "Exception occurred when searching for video \n" +str(e)
+                #return Response({'error':"Exception occurred when searching for video \n" +str(e)})
 
             return Response({"message": lyrics, "video": video_url})
         else:
