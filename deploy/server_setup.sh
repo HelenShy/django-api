@@ -21,7 +21,7 @@ mkdir -p $PROJECT_BASE_PATH
 git clone $PROJECT_GIT_URL $PROJECT_BASE_PATH/django-api
 
 mkdir -p $VIRTUALENV_BASE_PATH
-virtualenv --python=python3 $VIRTUALENV_BASE_PATH/django-api
+virtualenv --python=python3 $VIRTUALENV_BASE_PATH/django_api
 
 source $VIRTUALENV_BASE_PATH/django_api/bin/activate
 pip install -r $PROJECT_BASE_PATH/django-api/requirements.txt
