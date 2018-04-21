@@ -8,7 +8,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework import filters
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 
 from . import serializers
 from . import models
@@ -39,6 +39,19 @@ class LoginViewSet(viewsets.ViewSet):
         Use ObtainAuthToken APIView to validate and create token
         """
         return ObtainAuthToken().post(request)
+
+
+class LogoutViewSet(viewsets.ViewSet):
+    authentication_classes = (TokenAuthentication,)
+    queryset = models.UserProfile.objects.all()
+    permission_classes = (IsAuthenticated, )
+
+    def create(self, request, format=None):
+        """
+        Deletes the token to force a logout
+        """
+        request.user.auth_token.delete()
+        return Response(status=status.HTTP_200_OK)
 
 
 class UserProfileFeedViewSet(viewsets.ModelViewSet):
@@ -133,7 +146,7 @@ class LyricsViewSet(viewsets.ModelViewSet):
         user = self.request.user
 
         queryset = models.Lyrics.objects.all()
-        search_param = {}
+        search_param = dict()
         search_param['lyrics_collection'] = self.request.query_params.get('lyrics_collection', None)
         search_param['user_profile']  = self.request.query_params.get('user_profile', None)
         if search_param['lyrics_collection']  is not None:

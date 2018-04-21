@@ -105,3 +105,5 @@ ENV/
 *.mp4
 .mp4
 .sqlite3
+
+/django_api/settings.py
