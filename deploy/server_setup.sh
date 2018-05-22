@@ -10,8 +10,8 @@ VIRTUALENV_BASE_PATH='/usr/local/virtualenvs'
 locale-gen en_GB.UTF-8
 
 # Install Python, SQLite and pip
-sudo -H apt-get update
-sudo -H apt-get install -y python3-dev sqlite python-pip supervisor nginx git
+apt-get update
+apt-get install -y python3-dev sqlite python-pip supervisor nginx git
 
 # Upgrade pip to the latest version.
 pip install --upgrade pip
