@@ -1,14 +1,12 @@
-from django.shortcuts import render
-
-from rest_framework import viewsets
+from django.shortcuts import render, get_object_or_404
+from rest_framework import viewsets, status, generics, filters, permissions as prm
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
-from rest_framework import filters
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.response import Response
 
 from . import serializers
 from . import models
@@ -28,9 +26,11 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     search_fields = ('name', 'email',)
 
 
-class LoginViewSet(viewsets.ViewSet):
+class LoginViewSet(viewsets.ViewSet, generics.GenericAPIView):
     """
-    Checks email and password, returns an auth token
+    Log in using your username and password.
+
+    **returns:** Token.
     """
     serializer_class = AuthTokenSerializer
 
@@ -42,13 +42,17 @@ class LoginViewSet(viewsets.ViewSet):
 
 
 class LogoutViewSet(viewsets.ViewSet):
+    """
+    Log out.
+    """
     authentication_classes = (TokenAuthentication,)
     queryset = models.UserProfile.objects.all()
     permission_classes = (IsAuthenticated, )
 
     def create(self, request, format=None):
         """
-        Deletes the token to force a logout
+        Log out.
+        Operation deletes login token.
         """
         request.user.auth_token.delete()
         return Response(status=status.HTTP_200_OK)
@@ -56,7 +60,27 @@ class LogoutViewSet(viewsets.ViewSet):
 
 class UserProfileFeedViewSet(viewsets.ModelViewSet):
     """
-    Handles creating, reading and updating profile feed items.
+    list:
+    Returns a list of all saved users statuses.
+
+    create:
+    Save new status. 
+    Authentication required.
+
+    read:
+    Get user status by id.
+
+    update:
+    Update user status. 
+    Authentication required.
+
+    partial_update:
+    Partial update of user status. 
+    Authentication required.
+
+    delete:
+    Delete user status. 
+    Authentication required.
     """
     authentication_classes = (TokenAuthentication,)
     serializer_class = serializers.ProfileFeedItemSerializer
@@ -71,13 +95,15 @@ class UserProfileFeedViewSet(viewsets.ModelViewSet):
         serializer.save(user_profile=self.request.user)
 
 
-class SearchViewSet(viewsets.ViewSet):
+class SearchViewSet(viewsets.ViewSet, generics.GenericAPIView):
     serializer_class = serializers.SearchSerializer
     #queryset = models.Search.objects.all()
 
     def create(self, request):
         """
-        Handles lyrics search by artist name and song title
+        Search lyrics by artist name and song title.
+
+        **returns:** Song lyrics and video link.
         """
         #search_text = models.Search
         #resp = search_text.search(str(request))
@@ -102,15 +128,35 @@ class SearchViewSet(viewsets.ViewSet):
                 serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class LyricsCollectionViewSet(viewsets.ModelViewSet):
+class LyricsCollectionViewSet(viewsets.ModelViewSet, generics.GenericAPIView):
     """
-    Handles creating, reading and updating lyrics collections.
+    list:
+    Returns a list of all saved lyrics collections.
+
+    create:
+    Save new lyrics collection. 
+    Authentication required.
+
+    read:
+    Get collection by id.
+
+    update:
+    Update existing collection. 
+    Authentication required.
+
+    partial_update:
+    Partial update of existing collection. 
+    Authentication required.
+
+    delete:
+    Delete existing collection. 
+    Authentication required.
     """
     authentication_classes = (TokenAuthentication,)
     serializer_class = serializers.LyricsCollectionSerializer
     queryset = models.LyricsCollection.objects.all()
     permission_classes = (
-        permissions.EditOwnLyrics , IsAuthenticatedOrReadOnly)
+        permissions.EditOwnLyrics, IsAuthenticatedOrReadOnly)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('song_title',)
 
@@ -121,15 +167,35 @@ class LyricsCollectionViewSet(viewsets.ModelViewSet):
         serializer.save(user_profile=self.request.user)
 
 
-class LyricsViewSet(viewsets.ModelViewSet):
+class LyricsViewSet(viewsets.ModelViewSet, generics.GenericAPIView):
     """
-    Handles creating, reading and updating lyrics instances.
+    list:
+    Returns a list of all saved lyrics.
+
+    create:
+    Save new lyrics. 
+    Authentication required.
+
+    read:
+    Get song lyrics by id.
+
+    update:
+    Update existing lyrics. 
+    Authentication required.
+
+    partial_update:
+    Partial update of existing lyrics. 
+    Authentication required.
+
+    delete:
+    Delete existing lyrics. 
+    Authentication required.
     """
     authentication_classes = (TokenAuthentication,)
     serializer_class = serializers.LyricsSerializer
     queryset = models.Lyrics.objects.all()
     permission_classes = (
-        permissions.EditOwnLyrics , IsAuthenticatedOrReadOnly)
+        permissions.EditOwnLyrics, IsAuthenticatedOrReadOnly)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('song_title', )
 
@@ -154,21 +220,3 @@ class LyricsViewSet(viewsets.ModelViewSet):
         if search_param['user_profile']  is not None:
             queryset = queryset.filter(user_profile=search_param['user_profile'])
         return queryset
-
-    # def get_serializer_class(self):
-    #     user = self.request.user
-    #
-    #     import rest_framework
-    #
-    #     class LyricsSerializer(rest_framework.serializers.ModelSerializer):
-    #         """
-    #         Serializes lyrics collection inctance.
-    #         """
-    #         #user_profile =  serializers.PrimaryKeyRelatedField(read_only=True, default=serializers.CurrentUserDefault())
-    #
-    #         lyrics_collection =  rest_framework.serializers.PrimaryKeyRelatedField(queryset=models.LyricsCollection.objects.filter(user_profile=user))
-    #         class Meta:
-    #             model = models.Lyrics
-    #             fields = ('id', 'user_profile', 'artist', 'song_title', 'song_lyrics', 'lyrics_collection')
-    #             extra_kwargs = {'user_profile': {'read_only': True}}
-    #     return LyricsSerializer

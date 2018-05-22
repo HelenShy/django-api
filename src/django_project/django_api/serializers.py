@@ -43,8 +43,8 @@ class SearchSerializer(serializers.Serializer):
     """
     Serializes search object.
     """
-    artist = serializers.CharField(max_length=255)
-    song_title = serializers.CharField(max_length=255)
+    artist = serializers.CharField(max_length=255, help_text="Artist name")
+    song_title = serializers.CharField(max_length=255, help_text="Song title")
 
 
 class LyricsSerializer(serializers.ModelSerializer):
@@ -57,10 +57,15 @@ class LyricsSerializer(serializers.ModelSerializer):
         context = kwargs.get('context', None)
         if context:
             request = kwargs['context']['request']
+            user = None
+            request = self.context.get("request")
+            if request and hasattr(request, "user"):
+                user = request.user
             self.fields['lyrics_collection'] = serializers.PrimaryKeyRelatedField(
                 queryset=models.LyricsCollection.objects.filter(
-                    user_profile=self.context['request'].user))
-
+                    user_profile=3))
+    
+    lyrics_collection = serializers.Field(source='lyrics_collection.title')
     class Meta:
         model = models.Lyrics
         fields = ('id', 'user_profile', 'artist', 'song_title',
@@ -77,6 +82,9 @@ class LyricsCollectionSerializer(serializers.ModelSerializer):
         model = models.LyricsCollection
         fields = ('id', 'user_profile', 'title', 'lyrics_list')
         extra_kwargs = {'user_profile': {'read_only': True}}
+
+    def __repr__(self):
+        return self
 
     # def create(self, validated_data):
     #     """

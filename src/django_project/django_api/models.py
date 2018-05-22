@@ -84,21 +84,35 @@ class Lyrics(models.Model):
     """
     Song lyrics
     """
-    artist = models.CharField(max_length=255)
-    song_title = models.CharField(max_length=255)
-    song_lyrics = models.CharField(max_length=1023)
+    artist = models.CharField(max_length=255, help_text="Add artist name")
+    song_title = models.CharField(max_length=255, help_text="Add song name")
+    song_lyrics = models.CharField(max_length=1023, help_text="Add song lyrics")
     user_profile = models.ForeignKey('UserProfile', on_delete=models.CASCADE)
-    lyrics_collection = models.ForeignKey('LyricsCollection', related_name='lyrics_list', on_delete=models.CASCADE)
-    public = models.BooleanField(default=True)
-    video_url = models.URLField(max_length=255, blank=True)
+    lyrics_collection = models.ForeignKey(
+        'LyricsCollection', 
+        related_name='lyrics_list', 
+        on_delete=models.CASCADE,
+        help_text="Collection song will be added to"
+        )
+    public = models.BooleanField(default=True, 
+                                help_text="Select whether everybody can view the song")
+    video_url = models.URLField(max_length=255, blank=True, 
+                                help_text="Add video link to the song")
+
+    def __str__(self):
+        return self.song_title + ' ' + self.artist
 
 
 class LyricsCollection(models.Model):
     """
     Collection of song lyrics
     """
-    user_profile = models.ForeignKey('UserProfile', on_delete=models.CASCADE)
-    title = models.CharField(max_length=255)
+    user_profile = models.ForeignKey('UserProfile', 
+                                    on_delete=models.CASCADE)
+    title = models.CharField(max_length=255, help_text="Add collection title")
 
     def __str__(self):
+        return self.title
+
+    def __repr__(self):
         return self.title

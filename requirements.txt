@@ -3,4 +3,4 @@ djangorestframework==3.8.2
 pytz==2018.4
 bs4
 requests==2.18.4
-uWSGI==2.0.15
+
